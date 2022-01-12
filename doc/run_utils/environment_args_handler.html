@@ -28,6 +28,7 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from collections import OrderedDict
+from gym import spaces
 import numpy as np
 import gym
 import TeachMyAgent.environments
@@ -112,6 +113,10 @@ class EnvironmentArgsHandler(AbstractArgsHandler):
         parser.add_argument(&#39;--max_creepers_spacing&#39;, type=float, default=5)
         parser.add_argument(&#39;--lidars_type&#39;,  type=str, default=None)
         parser.add_argument(&#39;--movable_creepers&#39;, action=&#39;store_true&#39;)
+
+        ##### Coinrun Env #####
+        # Provide the seeds for the levels
+        parser.add_argument(&#39;--level_seeds&#39;, type=int, nargs=&#39;+&#39;, help=&#34;select a seed sequence used for level generation&#34;)
 
 
     @classmethod
@@ -223,6 +228,19 @@ class EnvironmentArgsHandler(AbstractArgsHandler):
                                      water_clip=args.water_clip_push,
                                      movable_creepers=movable_creepers,
                                      **cls.get_body_wargs(args))
+
+        elif args.env == &#34;coinrun&#34;:
+            # not actually used, only here for the validation code
+            args.env_reward_lb = -100
+            args.env_reward_ub = 100
+
+            def make_env(level_seeds):
+                env = gym.make(&#39;procgen:procgen-coinrun-v0&#39;)
+                if level_seeds is not None:
+                    env.unwrapped.env.env.set_environment([level_seeds])
+                return env
+
+            env_f = lambda: make_env(args.level_seeds)
 
         else:
             print(&#34;Using an unknown env with no parameters...&#34;)
@@ -329,6 +347,10 @@ class EnvironmentArgsHandler(AbstractArgsHandler):
         parser.add_argument(&#39;--lidars_type&#39;,  type=str, default=None)
         parser.add_argument(&#39;--movable_creepers&#39;, action=&#39;store_true&#39;)
 
+        ##### Coinrun Env #####
+        # Provide the seeds for the levels
+        parser.add_argument(&#39;--level_seeds&#39;, type=int, nargs=&#39;+&#39;, help=&#34;select a seed sequence used for level generation&#34;)
+
 
     @classmethod
     def get_object_from_arguments(cls, args):
@@ -439,6 +461,19 @@ class EnvironmentArgsHandler(AbstractArgsHandler):
                                      water_clip=args.water_clip_push,
                                      movable_creepers=movable_creepers,
                                      **cls.get_body_wargs(args))
+
+        elif args.env == &#34;coinrun&#34;:
+            # not actually used, only here for the validation code
+            args.env_reward_lb = -100
+            args.env_reward_ub = 100
+
+            def make_env(level_seeds):
+                env = gym.make(&#39;procgen:procgen-coinrun-v0&#39;)
+                if level_seeds is not None:
+                    env.unwrapped.env.env.set_environment([level_seeds])
+                return env
+
+            env_f = lambda: make_env(args.level_seeds)
 
         else:
             print(&#34;Using an unknown env with no parameters...&#34;)
@@ -613,6 +648,19 @@ def get_object_from_arguments(cls, args):
                                  movable_creepers=movable_creepers,
                                  **cls.get_body_wargs(args))
 
+    elif args.env == &#34;coinrun&#34;:
+        # not actually used, only here for the validation code
+        args.env_reward_lb = -100
+        args.env_reward_ub = 100
+
+        def make_env(level_seeds):
+            env = gym.make(&#39;procgen:procgen-coinrun-v0&#39;)
+            if level_seeds is not None:
+                env.unwrapped.env.env.set_environment([level_seeds])
+            return env
+
+        env_f = lambda: make_env(args.level_seeds)
+
     else:
         print(&#34;Using an unknown env with no parameters...&#34;)
         args.env_reward_lb = -100
@@ -679,7 +727,11 @@ def set_parser_arguments(parser):
     parser.add_argument(&#39;--max_creepers_h&#39;, type=float, default=4)
     parser.add_argument(&#39;--max_creepers_spacing&#39;, type=float, default=5)
     parser.add_argument(&#39;--lidars_type&#39;,  type=str, default=None)
-    parser.add_argument(&#39;--movable_creepers&#39;, action=&#39;store_true&#39;)</code></pre>
+    parser.add_argument(&#39;--movable_creepers&#39;, action=&#39;store_true&#39;)
+
+    ##### Coinrun Env #####
+    # Provide the seeds for the levels
+    parser.add_argument(&#39;--level_seeds&#39;, type=int, nargs=&#39;+&#39;, help=&#34;select a seed sequence used for level generation&#34;)</code></pre>
 </details>
 </dd>
 </dl>

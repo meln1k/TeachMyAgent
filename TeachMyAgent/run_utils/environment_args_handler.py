@@ -6,6 +6,7 @@ import TeachMyAgent.environments
 from TeachMyAgent.run_utils.abstract_args_handler import AbstractArgsHandler
 from TeachMyAgent.environments.envs.bodies.BodyTypesEnum import BodyTypesEnum
 from TeachMyAgent.environments.envs.bodies.BodiesEnum import BodiesEnum
+from typing import List
 
 
 class EnvironmentArgsHandler(AbstractArgsHandler):
@@ -205,10 +206,25 @@ class EnvironmentArgsHandler(AbstractArgsHandler):
             args.env_reward_lb = -100
             args.env_reward_ub = 100
 
+            # how many sections to be used, procgen was using a number between 1 and 6
+            param_env_bounds["nr_sections"] = [1, 6] 
+            # seed generation params
+            param_env_bounds["level_seeds"] = [1, 32768, 6] 
+
+            # expose the set_environment method via monkey patching
+            def _set_environment(self, nr_sections: int, level_seeds: List[float]):
+                # get the nr of sections to use
+                sections_to_take = round(nr_sections)
+                # round them and take what's needed
+                normalized = list(map(round, level_seeds))[0:sections_to_take]
+                self.unwrapped.env.env.set_environment([normalized])
+
             def make_env(level_seeds):
                 env = gym.make('procgen:procgen-coinrun-v0')
+                # bind the set_env method to the instance
+                env.set_environment = _set_environment.__get__(env)
                 if level_seeds is not None:
-                    env.unwrapped.env.env.set_environment([level_seeds])
+                    env.set_environment(len(level_seeds), level_seeds)
                 return env
 
             env_f = lambda: make_env(args.level_seeds)
